@@ -1,7 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { persistedReducer } from 'redux/Slices';
 import {
-  persistStore,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -9,9 +7,10 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
+import { rootReducer } from 'redux/Slices';
 
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
@@ -19,5 +18,3 @@ export const store = configureStore({
       },
     }),
 });
-
-export const persistor = persistStore(store);

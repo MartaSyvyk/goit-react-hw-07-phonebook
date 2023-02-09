@@ -2,13 +2,23 @@ import { Form } from 'components/Form/Form';
 import { ContactList } from 'components/ContactList/ContactList';
 import { nanoid } from 'nanoid';
 import { Filter } from 'components/Filter/Filter';
-import { add, remove, check } from 'redux/Slices';
+import { fetchContacts, addContact } from 'redux/Opeations';
+import { check } from 'redux/Slices';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { Loader } from 'components/Loader/Loader';
 
 export const Phonebook = () => {
-  const contacts = useSelector(state => state.contacts);
+  const contacts = useSelector(state => state.contacts.entities);
   const filter = useSelector(state => state.filter);
+  const isLoading = useSelector(state => state.contacts.isLoading);
+  const error = useSelector(state => state.contacts.error);
+
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   const formHandler = (newName, newNumber) => {
     let isAdded = false;
@@ -22,7 +32,7 @@ export const Phonebook = () => {
       return contact;
     });
     if (isAdded !== true) {
-      dispatch(add({ id: nanoid(5), name: newName, number: newNumber }));
+      dispatch(addContact({ id: nanoid(5), name: newName, phone: newNumber }));
     }
   };
 
@@ -37,22 +47,28 @@ export const Phonebook = () => {
     );
   };
 
-  const deleteContact = contactId => {
-    dispatch(remove(contactId));
-  };
-
   return (
-    <div>
-      <h1>Phonebook</h1>
-      <Form onSubmit={formHandler} />
-      <Filter filter={filter} handleChange={onChange} />
-      <h2>Contacts</h2>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+      }}
+    >
+      {isLoading && <Loader />}
+      <div>
+        <h1>Phonebook</h1>
+        <Form onSubmit={formHandler} />
+        <Filter filter={filter} handleChange={onChange} />
+        <h2>Contacts</h2>
 
-      {filter !== '' ? (
-        <ContactList data={filterHandler()} deleteContact={deleteContact} />
-      ) : (
-        <ContactList data={contacts} deleteContact={deleteContact} />
-      )}
+        {error && <div>{error}</div>}
+        {filter !== '' ? (
+          <ContactList data={filterHandler()} />
+        ) : (
+          <ContactList data={contacts} />
+        )}
+      </div>
     </div>
   );
 };
